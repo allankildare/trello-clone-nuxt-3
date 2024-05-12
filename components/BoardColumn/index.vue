@@ -49,7 +49,6 @@ function dropTask(dropEvent, toColumnIndex) {
   const fromColumnIndex = dropEvent.dataTransfer.getData('from-column-index')
   const fromTaskIndex = dropEvent.dataTransfer.getData('from-task-index')
 
-  console.log({fromColumnIndex, fromTaskIndex})
   boardStore.moveTask({
     taskIndex: fromTaskIndex,
     fromColumnIndex,
