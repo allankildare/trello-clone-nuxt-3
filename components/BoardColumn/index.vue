@@ -1,19 +1,22 @@
 <script setup>
 import { useBoardStore } from '~/stores/boardStore'
 
-defineProps({
+const props = defineProps({
   column: {
     type: Object,
     required: true,
-  }, columnIndex: {
+  },
+
+  columnIndex: {
     type: Number,
     required: true,
   }
 })
 
 const boardStore = useBoardStore()
-const isEdittingName = ref(false)
 const router = useRouter()
+const isEdittingName = ref(false)
+const newTaskName = ref('')
 
 function handleColumnNameEdit() {
   isEdittingName.value = !isEdittingName.value
@@ -25,6 +28,14 @@ function handleColumnNameDelete(columnIndex) {
 
 function goToTask(taskId) {
   router.push(`/tasks/${taskId}`)
+}
+
+function addTask() {
+  boardStore.addTask({
+    taskName: newTaskName.value,
+    columnIndex: props.columnIndex
+  })
+  newTaskName.value = ''
 }
 </script>
 
@@ -48,5 +59,7 @@ function goToTask(taskId) {
         </UCard>
       </li>
     </ul>
+    <UInput v-model="newTaskName" type="text" placeholder="Create new task" icon="i-heroicons-plus-circle-solid"
+      @keyup.enter="addTask" />
   </UContainer>
 </template>
