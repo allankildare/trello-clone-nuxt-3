@@ -23,7 +23,7 @@ function closeModal() {
   <div class="board-wrapper">
     <main class="board">
       <BoardColumn v-for="(column, index) in boardStore.board.columns" :key="column.id" :column="column"
-        :columnIndex="columnIndex">
+        :column-index="index">
       </BoardColumn>
       <UContainer class="column">
         <UInput v-model="newColumnName" type="text" placeholder="Create new column" icon="i-heroicons-plus-circle-solid"
