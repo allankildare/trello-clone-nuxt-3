@@ -37,10 +37,29 @@ function addTask() {
   })
   newTaskName.value = ''
 }
+
+function pickUpTask(dragEvent, { fromColumnIndex, fromTaskIndex }) {
+  dragEvent.dataTransfer.effectAllowed = 'move'
+  dragEvent.dataTransfer.dropEffect = 'move'
+  dragEvent.dataTransfer.setData('from-column-index', fromColumnIndex)
+  dragEvent.dataTransfer.setData('from-task-index', fromTaskIndex)
+}
+
+function dropTask(dropEvent, toColumnIndex) {
+  const fromColumnIndex = dropEvent.dataTransfer.getData('from-column-index')
+  const fromTaskIndex = dropEvent.dataTransfer.getData('from-task-index')
+
+  console.log({fromColumnIndex, fromTaskIndex})
+  boardStore.moveTask({
+    taskIndex: fromTaskIndex,
+    fromColumnIndex,
+    toColumnIndex,
+  })
+}
 </script>
 
 <template>
-  <UContainer class="column">
+  <UContainer class="column" @dragenter.prevent @dragover.prevent @drop.stop="dropTask($event, columnIndex)">
     <div class="column-header mb-4">
       <div>
         <h2 v-if="!isEdittingName" class="uppercase">{{ column.name }}</h2>
@@ -52,8 +71,8 @@ function addTask() {
       </div>
     </div>
     <ul>
-      <li v-for="task in column.tasks" :key="task.id">
-        <UCard class="mb-4" @click="goToTask(task.id)">
+      <li v-for="(task, taskIndex) in column.tasks" :key="task.id">
+        <UCard class="mb-4" @click="goToTask(task.id)" draggable="true" @dragstart="pickUpTask($event, { fromTaskIndex: taskIndex, fromColumnIndex: columnIndex})">
           <strong>{{ task.name }}</strong>
           <p>{{ task.description }}</p>
         </UCard>
