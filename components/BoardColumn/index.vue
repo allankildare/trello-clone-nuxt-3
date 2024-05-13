@@ -15,6 +15,7 @@ const props = defineProps({
 
 const boardStore = useBoardStore()
 const router = useRouter()
+
 const isEdittingName = ref(false)
 const newTaskName = ref('')
 
@@ -57,37 +58,38 @@ function pickUpColumn(dragEvent: DragEvent, fromColumnIndex: number) {
   }
 }
 
-function dropColumnOrTask(dropEvent: DragEvent, toColumnIndex: number) {
+function dropColumnOrTask(dropEvent: DragEvent, { toColumnIndex, toTaskIndex }: { toColumnIndex: number, toTaskIndex?: number }) {
   const type = dropEvent.dataTransfer?.getData('type')
-  const fromColumnIndex = dropEvent.dataTransfer !== null && dropEvent.dataTransfer.getData('from-column-index')
-
-  if (type === 'task' && dropEvent.dataTransfer !== null) {
-    const fromTaskIndex = dropEvent.dataTransfer.getData('from-task-index')
-
-    boardStore.moveTask({
-      taskIndex: fromTaskIndex,
-      fromColumnIndex,
-      toColumnIndex,
-    })
-    return
-  }
-
-  if (type === 'column' && dropEvent.dataTransfer !== null) {
-    boardStore.moveColumn({
-      fromColumnIndex,
-      toColumnIndex
-    })
+  
+  if (dropEvent.dataTransfer !== null) {
+    const fromColumnIndex = Number(dropEvent.dataTransfer.getData('from-column-index'))
+    
+    if (type === 'task') {
+      const fromTaskIndex = Number(dropEvent.dataTransfer.getData('from-task-index'))
+      boardStore.moveTask({
+        fromTaskIndex,
+        toTaskIndex,
+        fromColumnIndex,
+        toColumnIndex,
+      })
+    } else if (type === 'column') {
+      boardStore.moveColumn({
+        fromColumnIndex,
+        toColumnIndex
+      })
+    }
   }
 }
 </script>
 
 <template>
-  <UContainer class="column"
+  <UContainer
+    class="column"
     draggable="true"
-    @dragstart.self="pickUpColumn"
+    @dragstart.self="pickUpColumn($event, columnIndex)"
     @dragenter.prevent
     @dragover.prevent
-    @drop.stop="dropColumnOrTask($event, columnIndex)"
+    @drop.stop="dropColumnOrTask($event, { toColumnIndex: columnIndex })"
   >
     <div class="column-header mb-4">
       <div>
@@ -101,8 +103,13 @@ function dropColumnOrTask(dropEvent: DragEvent, toColumnIndex: number) {
     </div>
     <ul>
       <li v-for="(task, taskIndex) in column.tasks" :key="task.id">
-        <UCard class="mb-4" @click="goToTask(task.id)" draggable="true"
-          @dragstart="pickUpTask($event, { fromTaskIndex: taskIndex, fromColumnIndex: columnIndex })">
+        <UCard
+          class="mb-4"
+          @click="goToTask(task.id)"
+          draggable="true"
+          @dragstart="pickUpTask($event, { fromTaskIndex: taskIndex, fromColumnIndex: columnIndex })"
+          @drop.stop="dropColumnOrTask($event, { toColumnIndex: columnIndex, toTaskIndex: taskIndex })"
+        >
           <strong>{{ task.name }}</strong>
           <p>{{ task.description }}</p>
         </UCard>
