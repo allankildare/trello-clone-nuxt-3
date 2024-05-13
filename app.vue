@@ -4,7 +4,7 @@ useHead({
 })
 </script>
 <template>
-  <Html class="trello bg-emerald-500">
+  <Html class="trello bg-cyan-300">
     <div>
       <NuxtPage />
     </div>
