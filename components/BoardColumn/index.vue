@@ -98,7 +98,7 @@ function dropColumnOrTask(dropEvent: DragEvent, { toColumnIndex, toTaskIndex }: 
       </div>
       <div>
         <UButton icon="i-heroicons-pencil-square" @click="handleColumnNameEdit" />
-        <UButton icon="i-heroicons-trash" color="red" @click="handleColumnNameDelete" />
+        <UButton class="ml-2" icon="i-heroicons-trash" color="red" @click="handleColumnNameDelete" />
       </div>
     </div>
     <ul>
