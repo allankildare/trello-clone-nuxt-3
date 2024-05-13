@@ -42,14 +42,26 @@ function pickUpTask(dragEvent: DragEvent, { fromColumnIndex, fromTaskIndex }: { 
   if (dragEvent.dataTransfer !== null) {
     dragEvent.dataTransfer.effectAllowed = 'move'
     dragEvent.dataTransfer.dropEffect = 'move'
+    dragEvent.dataTransfer.setData('type', 'task')
     dragEvent.dataTransfer.setData('from-column-index', fromColumnIndex.toString())
     dragEvent.dataTransfer.setData('from-task-index', fromTaskIndex.toString())
   }
 }
 
-function dropTask(dropEvent: DragEvent, toColumnIndex: number) {
-  if (dropEvent.dataTransfer !== null) {
-    const fromColumnIndex = dropEvent.dataTransfer.getData('from-column-index')
+function pickUpColumn(dragEvent: DragEvent, fromColumnIndex: number) {
+  if (dragEvent.dataTransfer !== null) {
+    dragEvent.dataTransfer.effectAllowed = 'move'
+    dragEvent.dataTransfer.dropEffect = 'move'
+    dragEvent.dataTransfer.setData('type', 'column')
+    dragEvent.dataTransfer.setData('from-column-index', fromColumnIndex.toString())
+  }
+}
+
+function dropColumnOrTask(dropEvent: DragEvent, toColumnIndex: number) {
+  const type = dropEvent.dataTransfer?.getData('type')
+  const fromColumnIndex = dropEvent.dataTransfer !== null && dropEvent.dataTransfer.getData('from-column-index')
+
+  if (type === 'task' && dropEvent.dataTransfer !== null) {
     const fromTaskIndex = dropEvent.dataTransfer.getData('from-task-index')
 
     boardStore.moveTask({
@@ -57,12 +69,26 @@ function dropTask(dropEvent: DragEvent, toColumnIndex: number) {
       fromColumnIndex,
       toColumnIndex,
     })
+    return
+  }
+
+  if (type === 'column' && dropEvent.dataTransfer !== null) {
+    boardStore.moveColumn({
+      fromColumnIndex,
+      toColumnIndex
+    })
   }
 }
 </script>
 
 <template>
-  <UContainer class="column" @dragenter.prevent @dragover.prevent @drop.stop="dropTask($event, columnIndex)">
+  <UContainer class="column"
+    draggable="true"
+    @dragstart.self="pickUpColumn"
+    @dragenter.prevent
+    @dragover.prevent
+    @drop.stop="dropColumnOrTask($event, columnIndex)"
+  >
     <div class="column-header mb-4">
       <div>
         <h2 v-if="!isEdittingName" class="uppercase">{{ column.name }}</h2>
